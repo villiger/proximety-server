@@ -4,6 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import akka.io.IO
 import akka.util.Timeout
 import akka.pattern.ask
+import proximety.data.model.Token
 import spray.can.Http
 import scala.concurrent.duration._
 import proximety.actors.ApiActor
