@@ -1,11 +1,12 @@
 package proximety.actors
 
+import akka.actor.ActorLogging
 import akka.persistence.{RecoveryFailure, SnapshotOffer, PersistentActor}
 import proximety.data.{Commands, Events}
 import proximety.data.model.Model
 import scala.collection.mutable
 
-abstract class DataActor[K, V <: Model[K]] extends PersistentActor {
+abstract class DataActor[K, V <: Model[K]] extends PersistentActor with ActorLogging {
   var state = new mutable.HashMap[K, V]
 
   override def receiveCommand = {
@@ -16,13 +17,13 @@ abstract class DataActor[K, V <: Model[K]] extends PersistentActor {
     case Commands.Set(value: V) => persist(Events.Set(value)) { _ => state.put(value.id, value) }
     case Commands.Delete(key: K) => persist(Events.Delete(key)) { _ => state.remove(key) }
     case Commands.Snapshot => saveSnapshot(state)
-    case Commands.Status => println(state)
+    case Commands.Status => log.info(s"Status: $state")
   }
 
   override def receiveRecover = {
     case Events.Set(value: V) => state.put(value.id, value)
     case Events.Delete(key: K) => state.remove(key)
     case SnapshotOffer(_, snapshot: mutable.HashMap[K, V]) => state = snapshot
-    case RecoveryFailure(cause: scala.Throwable) => println("Recovery failure: " + cause.getMessage)
+    case RecoveryFailure(cause: scala.Throwable) => log.error(cause, s"Recovery failure: ${cause.getMessage}")
   }
 }

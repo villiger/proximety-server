@@ -14,7 +14,7 @@ import spray.routing.RejectionHandler
 import scala.concurrent.duration._
 import akka.pattern.ask
 
-trait ApiService extends TeapotService with AuthService with Json4sSupport with Adapter {
+trait ApiService extends Adapter with Json4sSupport with TeapotService with AuthService {
   self: ApiActor =>
 
   implicit val executionContext = scala.concurrent.ExecutionContext.Implicits.global
