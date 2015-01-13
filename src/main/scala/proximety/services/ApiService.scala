@@ -43,7 +43,7 @@ trait ApiService extends Adapter with Json4sSupport with TeapotService with Auth
     }
   }
 
-  // PRELOAD INITIAL DATA
+  // Preload initial data
   (Data.user ? Commands.Get("user1@proximety.ch")).mapTo[Option[User]].foreach {
     case None =>
       val user1 = User("User 1", "user1@proximety.ch", Hash.sha1("1234"), admin = true)
@@ -54,6 +54,12 @@ trait ApiService extends Adapter with Json4sSupport with TeapotService with Auth
       Data.user ! Commands.Set(user2)
       Data.user ! Commands.Set(user3)
     case _ => // they already exist, we don't have to set them again
+  }
+
+  // Get status info about the data every minute
+  context.system.scheduler.schedule(1.second, 1.minute) {
+    Data.user ! Commands.Status
+    Data.token ! Commands.Status
   }
 
   val routes =
