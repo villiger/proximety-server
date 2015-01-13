@@ -7,7 +7,7 @@ import proximety.data.model.Token
 class TokenDataActor extends DataActor[String, Token] {
   override def persistenceId = "token-data"
 
-  override def receiveCommand = super.receiveCommand orElse {
+  override def receiveCommand = ({
     case Commands.GenerateToken(email) =>
       var found = false
       while(!found) {
@@ -19,5 +19,5 @@ class TokenDataActor extends DataActor[String, Token] {
           found = true
         }
       }
-  }
+  }: Receive) orElse super.receiveCommand
 }
