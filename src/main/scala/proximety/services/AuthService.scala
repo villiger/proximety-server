@@ -37,7 +37,11 @@ trait AuthService extends HttpService {
             entity(as[EmailPassword]) { data =>
               onSuccess((Data.user ? Commands.Get(data.email)).mapTo[Option[User]]) {
                 case Some(user) if user.password == Hash.sha1(data.password) =>
-                  complete((Data.token ? Commands.GenerateToken(data.email)).mapTo[Token])
+                  complete {
+                    (Data.token ? Commands.GenerateToken(data.email)).mapTo[Token].map[Map[String, String]] { token =>
+                      Map("token" -> token.hash)
+                    }
+                  }
                 case _ =>
                   reject(AuthenticationFailedRejection(AuthenticationFailedRejection.CredentialsRejected, List()))
               }

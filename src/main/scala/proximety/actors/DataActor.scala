@@ -24,6 +24,6 @@ abstract class DataActor[K, V <: Model[K]] extends PersistentActor with ActorLog
     case Events.Set(value: V) => state.put(value.id, value)
     case Events.Delete(key: K) => state.remove(key)
     case SnapshotOffer(_, snapshot: mutable.HashMap[K, V]) => state = snapshot
-    case RecoveryFailure(cause: scala.Throwable) => log.error(cause, s"Recovery failure")
+    case RecoveryFailure(cause: scala.Throwable) => log.error(cause, s"Recovery failure: ${cause.getMessage}")
   }
 }

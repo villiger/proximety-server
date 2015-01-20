@@ -2,7 +2,7 @@ name := "proximety-reactive"
 
 version := "0.0.1-SNAPSHOT"
 
-scalaVersion := "2.11.4"
+scalaVersion := "2.11.5"
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
@@ -14,6 +14,7 @@ libraryDependencies ++= {
     "io.spray"                %%  "spray-routing" % sprayVersion,
     "io.spray"                %%  "spray-testkit" % sprayVersion  % "test",
     "org.json4s"              %%  "json4s-native" % "3.2.10",
+    "org.json4s"              %%  "json4s-ext"    % "3.2.10",
     "com.typesafe.akka"       %%  "akka-actor"    % akkaVersion,
     "com.typesafe.akka"       %%  "akka-testkit"  % akkaVersion   % "test",
     "com.typesafe.akka"       %%  "akka-persistence-experimental" % akkaVersion,

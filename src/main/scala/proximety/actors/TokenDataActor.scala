@@ -1,5 +1,6 @@
 package proximety.actors
 
+import scala.util.Random
 import proximety.util.Hash
 import proximety.data.{Commands, Events}
 import proximety.data.model.Token
@@ -9,15 +10,18 @@ class TokenDataActor extends DataActor[String, Token] {
 
   override def receiveCommand = ({
     case Commands.GenerateToken(email) =>
-      var found = false
-      while(!found) {
-        val hash = Hash.sha1(scala.util.Random.nextString(256))
-        if (!state.contains(hash)) {
-          val token = Token(email, hash)
-          persist(Events.Set(hash, token)) { _ => state.put(hash, token) }
-          sender() ! token
-          found = true
+      def generateToken(): Unit = {
+        val hash = Hash.sha1(Random.nextString(256))
+        if (state.contains(hash)) {
+          generateToken()
+        } else {
+          persist(Events.Set(Token(email, hash))) {
+            case Events.Set(token) =>
+              state.put(token.id, token)
+              sender() ! token
+          }
         }
       }
+      generateToken()
   }: Receive) orElse super.receiveCommand
 }

@@ -3,7 +3,7 @@ package proximety.services
 import akka.util.Timeout
 import org.json4s.{DefaultFormats, Formats}
 import proximety.actors.ApiActor
-import proximety.data.model.User
+import proximety.data.model.{Token, User}
 import proximety.data.{Commands, Adapter}
 import proximety.http.ParamRejection
 import proximety.util.Hash
@@ -19,7 +19,7 @@ trait ApiService extends Adapter with Json4sSupport with TeapotService with Auth
 
   implicit val executionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val timeout = Timeout(5.seconds)
-  implicit val json4sFormats: Formats = DefaultFormats
+  implicit val json4sFormats: Formats = DefaultFormats ++ org.json4s.ext.JodaTimeSerializers.all
 
   def jsonify(response: HttpResponse): HttpResponse = {
     import org.json4s.native.JsonMethods._
@@ -56,15 +56,13 @@ trait ApiService extends Adapter with Json4sSupport with TeapotService with Auth
     case _ => // they already exist, we don't have to set them again
   }
 
-  // Get status info about the data every minute
-  context.system.scheduler.schedule(1.second, 1.minute) {
-    Data.user ! Commands.Status
-    Data.token ! Commands.Status
-  }
-
   val routes =
     respondWithMediaType(MediaTypes.`application/json`) {
       TeapotService.routes ~
-      AuthService.routes
+      AuthService.routes ~
+      path("status" / Segment) {
+        case "token" => complete((Data.token ? Commands.All).mapTo[Iterable[Token]])
+        case "user" => complete((Data.user ? Commands.All).mapTo[Iterable[User]])
+      }
     }
 }
